@@ -9,6 +9,11 @@ namespace TrackerLibrary
 	{
 		public static void SendEmail(List<string> to, string subject, string body)
 		{
+			SendEmail(to, new List<string>(), subject, body);
+		}
+
+		public static void SendEmail(List<string> to, List<string> bcc, string subject, string body)
+		{
 			string fromAddress = GlobalConfig.AppKeyLookup("senderEmail");
 			string displayName = GlobalConfig.AppKeyLookup("senderDisplayName");
 
@@ -16,6 +21,7 @@ namespace TrackerLibrary
 
 			MailMessage mail = new MailMessage();
 			to.ForEach(address => { mail.To.Add(address); });
+			bcc.ForEach(address => { mail.Bcc.Add(address); });
 			mail.From = fromMailAddress;
 			mail.Subject = subject;
 			mail.Body = body;

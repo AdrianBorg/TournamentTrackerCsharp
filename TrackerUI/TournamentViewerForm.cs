@@ -17,18 +17,28 @@ namespace TrackerUI
         private TournamentModel tournament;
         List<int> rounds = new List<int>();
         List<MatchupModel> selectedMatchups = new List<MatchupModel>();
-        public TournamentViewerForm(TournamentModel tournamentModel)
+        ITournamentRequester callingForm;
+        public TournamentViewerForm(TournamentModel tournamentModel, ITournamentRequester caller)
         {
             InitializeComponent();
 
             tournament = tournamentModel;
+            callingForm = caller;
+
+			tournament.OnTournamentComplete += Tournament_OnTournamentComplete;
 
             LoadFormData();
 
             LoadRounds();
         }
 
-        private void LoadFormData()
+		private void Tournament_OnTournamentComplete(object sender, DateTime e)
+		{
+            callingForm.TournamentComplete();
+            this.Close();
+		}
+
+		private void LoadFormData()
 		{
             tournamentName.Text = tournament.TournamentName;
 		}
