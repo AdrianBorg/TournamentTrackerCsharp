@@ -27,6 +27,8 @@ namespace TrackerLibrary
 
 		public static void UpdateTournamentResults(TournamentModel model)
 		{
+			int startingRound = model.checkCurrentRound();
+
 			List<MatchupModel> toScore = new List<MatchupModel>();
 
 			model.Rounds.ForEach(round =>
@@ -48,6 +50,83 @@ namespace TrackerLibrary
 			AdvanceWinners(toScore, model);
 
 			toScore.ForEach(x => GlobalConfig.Connection.UpdateMatchup(x));
+
+			int endingRound = model.checkCurrentRound();
+
+			if (endingRound > startingRound)
+			{
+				model.AlertUsersToNewRound();
+			}
+		}
+
+		public static void AlertUsersToNewRound(this TournamentModel model)
+		{
+			int currentRoundNumber = model.checkCurrentRound();
+			List<MatchupModel> currentRound = model.Rounds.Where(x => x.First().MatchupRound == currentRoundNumber).First();
+
+			currentRound.ForEach(matchup =>
+			{
+				matchup.Entries.ForEach(me =>
+				{
+					me.TeamCompeting.TeamMembers.ForEach(p =>
+					{
+						AlertPersonToNewRound(p, me.TeamCompeting.TeamName, matchup.Entries.Where(x => x.TeamCompeting != me.TeamCompeting).FirstOrDefault());
+					});
+				});
+			});
+
+		}
+
+		private static void AlertPersonToNewRound(PersonModel p, string teamName, MatchupEntryModel competitor)
+		{
+			if (p.Email.Length == 0)
+			{
+				return;
+			}
+
+			List<string> to = new List<string>();
+			string subject = "";
+
+			StringBuilder body = new StringBuilder();
+
+			if (competitor != null)
+			{
+				subject = $"You have a new matchup with { competitor.TeamCompeting.TeamName } ";
+
+				body.AppendLine("<h1>You have a new matchup</h1>");
+				body.Append("<strong>Competitor: </string>");
+				body.Append(competitor.TeamCompeting.TeamName);
+				body.AppendLine();
+				body.AppendLine();
+				body.AppendLine("Have a great time!");
+				body.AppendLine("~Tournament Tracker");
+			}
+			else
+			{
+				subject = "You have a bye round this time";
+
+				body.AppendLine("Enjoy your round off");
+				body.AppendLine("~Tournament Tracker");
+			}
+
+			to.Add(p.Email);
+
+			EmailLogic.SendEmail(to, subject, body.ToString());
+		}
+
+		private static int checkCurrentRound(this TournamentModel model)
+		{
+			int output = 1;
+
+			model.Rounds.ForEach(round =>
+			{
+				if (round.All(x => x.Winner != null))
+				{
+					output += 1;
+				}
+			});
+
+			return output;
 		}
 
 		private static void AdvanceWinners(List<MatchupModel> models, TournamentModel tournament)
