@@ -33,8 +33,9 @@ namespace TrackerLibrary
 			{
 				round.ForEach(rm =>
 				{
-					if (rm.Winner == null 
-						&& (rm.Entries.Any(x => x.Score != 0) 
+					if (
+					//rm.Winner == null && 
+						(rm.Entries.Any(x => x.Score != 0) 
 							|| rm.Entries.Count == 1))
 					{
 						toScore.Add(rm);
@@ -99,7 +100,7 @@ namespace TrackerLibrary
 					}
 					else
 					{
-						throw new Exception("We do noe allow ties in this app");
+						throw new Exception("We do not allow ties in this app");
 					}
 				}
 				else // 1 means true or high score wins
@@ -114,7 +115,7 @@ namespace TrackerLibrary
 					}
 					else
 					{
-						throw new Exception("We do noe allow ties in this app");
+						throw new Exception("We do not allow ties in this app");
 					}
 				}
 			}
