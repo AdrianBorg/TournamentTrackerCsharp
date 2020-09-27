@@ -14,12 +14,15 @@ namespace TrackerUI
 {
 	public partial class CreateTournamentForm : Form, IPrizeRequester, ITeamRequester
 	{
+		ITournamentRequester callingForm;
 		List<TeamModel> availableTeams = GlobalConfig.Connection.GetTeams_All();
 		List<TeamModel> selectedTeams = new List<TeamModel>();
 		List<PrizeModel> selectedPrizes = new List<PrizeModel>();
 
-		public CreateTournamentForm()
+		public CreateTournamentForm(ITournamentRequester caller)
 		{
+			callingForm = caller;
+
 			InitializeComponent();
 
 			WireUpLists();
@@ -136,6 +139,7 @@ namespace TrackerUI
 
 			GlobalConfig.Connection.CreateTournament(tm);
 
+			callingForm.TournamentComplete();
 			TournamentViewerForm frm = new TournamentViewerForm(tm);
 			frm.Show();
 			this.Close();
